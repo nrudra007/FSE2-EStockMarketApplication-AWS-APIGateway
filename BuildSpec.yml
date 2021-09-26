@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo installing Docker daemon in the pre_build phase...
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 972080028279.dkr.ecr.us-east-2.amazonaws.com 
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Start Building maven package
+      - mvn package
+      - echo Complete Building maven package
+      - echo Start Building the Docker image...      
+      - docker build -t e-stock-market-repo/api-gateway-server-ecr-image:latest .
+      - echo Complete building the Docker image... 
+      - echo Start Tagging the Docker image... 
+      - docker tag e-stock-market-repo/api-gateway-server-ecr-image:latest 972080028279.dkr.ecr.us-east-2.amazonaws.com/e-stock-market-repo/api-gateway-server-ecr-image:latest
+      - echo Complete Tagging the Docker image... 
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Start Pushing the Docker image...
+      - docker push 972080028279.dkr.ecr.us-east-2.amazonaws.com/e-stock-market-repo/api-gateway-server-ecr-image:latest
+      - echo Complete Pushing the Docker image...
